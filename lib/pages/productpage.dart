@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:fonend/pages/addproduct.dart';
 import 'package:fonend/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -43,9 +45,8 @@ class _productpagesState extends State<productpages> {
   // เมธอดสำหรับโหลดข้อมูลสินค้า
   Future<void> _loadProducts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token =
-        prefs.getString('token') ?? ''; // รับโทเค็นจาก SharedPreferences
-    print(token);
+    String token = prefs.getString('token') ?? '';
+
     var url = Uri.parse("https://642021154.pungpingcoding.online/api/product");
     var response = await http.get(url, headers: {
       HttpHeaders.contentTypeHeader: "application/json",
@@ -53,7 +54,7 @@ class _productpagesState extends State<productpages> {
     });
 
     if (response.statusCode == 200) {
-      // แปลงข้อมูล JSON ให้เป็น List<Product>
+      _loadProducts();
       var jsonData = jsonDecode(response.body);
 
       setState(() {
@@ -67,19 +68,20 @@ class _productpagesState extends State<productpages> {
   }
 
   Future<void> _deleteProduct(int id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
     var url =
-        Uri.parse('https://642021154.pungpingcoding.online/api/products/$id');
+        Uri.parse('https://642021154.pungpingcoding.online/api/product/$id');
 
     var response = await http.delete(
       url,
       headers: {
         HttpHeaders.contentTypeHeader: 'application/json',
-        HttpHeaders.authorizationHeader: "Bearer $_token"
+        HttpHeaders.authorizationHeader: "Bearer $token"
       },
     );
-
+    print(response.statusCode);
     if (response.statusCode == 200) {
-      // If deletion is successful, remove the product from the list
       setState(() {
         products!.removeWhere((product) => product.id == id);
       });
@@ -157,17 +159,69 @@ class _productpagesState extends State<productpages> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(products[index].productName),
-            subtitle: Text(
-                "ประเภท: ${products[index].productType}, ราคา: ${products[index].price.toStringAsFixed(2)} บาท"),
-
-            // แสดงรายละเอียดเพิ่มเติมได้ตามต้องการ
-          );
-        },
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: products == null || products!.isEmpty
+                  ? const CircularProgressIndicator()
+                  : ListView.builder(
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ListTile(
+                            title: Column(
+                              children: [
+                                Text(products[index].productName),
+                              ],
+                            ),
+                            subtitle: Column(
+                              children: [
+                                Text("ประเภท: ${products[index].productType}"),
+                                Text(
+                                  "ราคา: ${products[index].price.toStringAsFixed(2)} บาท",
+                                ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                _deleteProduct(products[index].id);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('เพิ่มสินค้า:'),
+                const SizedBox(width: 16),
+                FloatingActionButton.extended(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddProduct()),
+                    );
+                  },
+                  label: const Text('Add'),
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

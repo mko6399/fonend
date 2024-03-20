@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:fonend/pages/productpage.dart';
+import 'package:fonend/pages/registerpages.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Welcome Back!',
+                  'Welcome to product!',
                   style: TextStyle(
                     fontSize: 28.0,
                     fontWeight: FontWeight.bold,
@@ -38,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Login to your account',
+                  ' Product form Golf 154',
                   style: TextStyle(
                     fontSize: 16.0,
                     color: Colors.grey[700],
@@ -120,10 +121,13 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 20),
                 TextButton(
                   onPressed: () {
-                    // Add forgot password logic here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
                   },
                   child: Text(
-                    'Forgot Password?',
+                    'register',
                     style: TextStyle(color: Colors.blue, fontSize: 16),
                   ),
                 ),
